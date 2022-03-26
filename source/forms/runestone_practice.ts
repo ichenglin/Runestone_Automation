@@ -2,7 +2,6 @@ import fetch from "node-fetch";
 import cheerio from "cheerio";
 import { fetch_session } from "../system/fetch_session";
 import { LoginCredentials } from "./runestone_login";
-import { fetch_body } from "../system/fetch_body";
 
 interface PracticeQuestion {
     question_remain: number,
@@ -75,7 +74,8 @@ async function runestone_practice_new(login_credentials: LoginCredentials): Prom
 }
 
 async function runestone_practice_submit(login_credentials: LoginCredentials, practice_question: PracticeQuestion): Promise<void> {
-    const practice_question_body = fetch_body({
+    // have to send in JSON format, therefore not using fetch_body function.
+    const practice_question_body = {
         act: `answer:${practice_question.question_answer}:correct`,
         answer: `${practice_question.question_answer}`,
         clientLoginStatus: true,
@@ -85,13 +85,15 @@ async function runestone_practice_submit(login_credentials: LoginCredentials, pr
         event: "mChoice",
         percent: 1,
         timezoneoffset: login_credentials.access_timezone
-    });
-    console.log(practice_question_body);
+    };
     // "Check Me" button
     await fetch("https://runestone.academy/ns/logger/bookevent", {
         method: "POST",
-        headers: fetch_session(login_credentials),
-        body: practice_question_body
+        headers: {
+            "content-type": "application/json; charset=utf-8",
+            Cookie: fetch_session(login_credentials).Cookie
+        },
+        body: JSON.stringify(practice_question_body)
     });
     // "Done! Ask me another question!" button
     await fetch(`https://runestone.academy/runestone/assignments/checkanswer/?QID=${practice_question.question_postpone.qid}`, {headers: fetch_session(login_credentials)});
