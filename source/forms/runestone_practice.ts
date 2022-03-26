@@ -2,6 +2,7 @@ import fetch from "node-fetch";
 import cheerio from "cheerio";
 import { fetch_session } from "../system/fetch_session";
 import { LoginCredentials } from "./runestone_login";
+import { send_log } from "../system/send_log";
 
 interface PracticeQuestion {
     question_remain: number,
@@ -19,19 +20,19 @@ export async function runestone_practice(login_credentials: LoginCredentials): P
         const practice_question = await runestone_practice_new(login_credentials);
         if (practice_question.question_remain <= 0) {
             // no more question available
-            console.log("no question remaining.");
+            send_log("no questions remaining");
             return;
         }
-        console.log(`get question: ${practice_question.question_id} (answer: ${practice_question.question_answer}) (remain: ${practice_question.question_remain})`);
+        send_log(`new question (id=${practice_question.question_id}) (answer=${practice_question.question_answer}) (remain=${practice_question.question_remain})`);
         const automation_available = practice_question.question_type === "multiplechoice" && practice_question.question_answer_multiple === false;
         if (automation_available) {
             // submit answer
             await runestone_practice_submit(login_credentials, practice_question);
-            console.log(`submitted question: ${practice_question.question_id}`);
+            send_log(`submitted question ${practice_question.question_id}`);
         } else {
             // postpone to next question
             await runestone_practice_postpone(login_credentials, practice_question);
-            console.log(`postponed question: ${practice_question.question_id}`);
+            send_log(`postponed question ${practice_question.question_id}`);
         }
     }
 }
@@ -84,7 +85,7 @@ async function runestone_practice_submit(login_credentials: LoginCredentials, pr
         div_id: practice_question.question_id,
         event: "mChoice",
         percent: 1,
-        timezoneoffset: login_credentials.access_timezone
+        timezoneoffset: (-1) * login_credentials.access_timezone
     };
     // "Check Me" button
     await fetch("https://runestone.academy/ns/logger/bookevent", {

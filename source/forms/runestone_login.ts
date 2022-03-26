@@ -81,6 +81,6 @@ async function runestone_login_request(username: string, password: string, timez
 }
 
 async function runestone_login_timezone(login_credentials: LoginCredentials): Promise<void> {
-    const timezone_body = fetch_body({timezoneoffset: login_credentials.access_timezone});
+    const timezone_body = fetch_body({timezoneoffset: (-1) * login_credentials.access_timezone});
     await fetch("https://runestone.academy/ns/logger/set_tz_offset", {method: "POST", body: timezone_body, headers: fetch_session(login_credentials)});
 }
