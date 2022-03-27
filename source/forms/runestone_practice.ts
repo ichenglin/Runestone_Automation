@@ -56,7 +56,7 @@ async function runestone_practice_new(login_credentials: LoginCredentials): Prom
         } as PracticeQuestion;
     }
     const practice_question_course = ($("#navbar > div > div.navbar-collapse.collapse.navbar-ex1-collapse > ul:nth-child(2) > li:nth-child(2) > a").html()?.match(/^Back to (.+)$/) as string[])[1];
-    const practice_question_header = $("[data-component=multiplechoice]:nth-child(1)") || $("[data-component=activecode]:nth-child(1)");
+    const practice_question_header = $("[data-component]:nth-child(1)");
     const practice_question_id = practice_question_header.attr("id") as string;
     const practice_question_data = practice_question_header.data();
     const practice_question_answer_id = $("[data-component=answer][data-correct=]").attr("id");
@@ -111,7 +111,7 @@ function runestone_practice_question_remain(remain_text: string): number {
     if (remain_text === undefined) {
         return 0;
     }
-    const question_remain_matcher = remain_text.match(/^(\d+) questions left/);
+    const question_remain_matcher = remain_text.match(/^(\d+) questions? left/);
     if (question_remain_matcher === null) {
         return 0;
     }
